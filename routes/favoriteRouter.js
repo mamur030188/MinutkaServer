@@ -35,14 +35,17 @@ favoriteRouter.route('/')
                         favorite.dishes.push(req.body[i]);
                 favorite.save()
                 .then((favorite) => {
-                    console.log('Favorite created!');
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json(favorite);
+                    Favorites.findById(favorite._id)
+                    .populate('user')
+                    .populate('dishes')
+                    .then((favorite) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(favorite);
+                    })
                 })
                 .catch((err) => {
-                    next(err);
-                    return;
+                    return next(err);
                 });
             })
             .catch((err) => {
@@ -51,19 +54,22 @@ favoriteRouter.route('/')
             })
         }
         else {
-            for (i = o; i < req.body.length; i++ )
-                if (favorite.dishes.indexOf(req.body[i]._id) < 0)
+            for (i = 0; i < req.body.length; i++ )
+                if (favorite.dishes.indexOf(req.body[i]._id) < 0)                                  
                     favorite.dishes.push(req.body[i]);
             favorite.save()
             .then((favorite) => {
-                console.log('Favorite Dish Added!');
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(favorite);
+                Favorites.findById(favorite._id)
+                .populate('user')
+                .populate('dishes')
+                .then((favorite) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(favorite);
+                })
             })
             .catch((err) => {
-                next(err);
-                return;
+                return next(err);
             });
         }
     });    
@@ -115,17 +121,20 @@ favoriteRouter.route('/:dishId')
         if (!favorite) {  
             Favorites.create({ user: req.user._id })
             .then((favorite) => {
-                favorite.dishes.push({ "_id": req.params.dishId });  
+                favorite.dishes.push({ "_id": req.params.dishId });
                 favorite.save()
                 .then((favorite) => {
-                    console.log('Favorite created!');
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json(favorite);
+                    Favorites.findById(favorite._id)
+                    .populate('user')
+                    .populate('dishes')
+                    .then((favorite) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(favorite);
+                    })
                 })
                 .catch((err) => {
-                    next(err);
-                    return;
+                    return next(err);
                 });
             })
             .catch((err) => {
@@ -134,25 +143,24 @@ favoriteRouter.route('/:dishId')
             })
         }
         else {
-            if (favorite.dishes.indexOf(req.params.dishId) < 0 )
-                favorites.dishes.push({ "_id": req.params.dishId });    
+            if (favorite.dishes.indexOf(req.params.dishId) < 0) {                
+                favorite.dishes.push(req.body);
                 favorite.save()
                 .then((favorite) => {
-                    console.log('Favorite Dish Added!');
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json(favorite);
+                    Favorites.findById(favorite._id)
+                    .populate('user')
+                    .populate('dishes')
+                    .then((favorite) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(favorite);
+                    })
                 })
                 .catch((err) => {
-                    next(err);
-                    return;
+                    return next(err);
                 })
-            } 
-            else {
-                res.statusCode = 403;
-                res.setHeader('Content-Type', 'text/plain');
-                res.end('Dish ' + req.params._id + ' already exists in your favorite dishes!');
-            }       
+            }
+        }       
             
     });
 })
@@ -170,10 +178,14 @@ favoriteRouter.route('/:dishId')
         favorite.dishes.splice(index,1);
         favorite.save()
             .then((favorite) => {
-                console.log('Favorite Dish Deleted!', favorite);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(favorite);
+                Favorites.findById(favorite._id)
+                .populate('user')
+                .populate('dishes')
+                .then((favorite) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(favorite);
+                })
             })
             .catch((err) => {
                 return next(err);            
